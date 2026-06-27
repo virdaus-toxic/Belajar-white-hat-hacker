@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>50K Python Challenge</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0f1a;color:#fff;font-family:'Poppins',Arial}
+.container{max-width:420px;margin:0 auto;padding:12px}
+.screen{display:none}
+.screen.active{display:block}
+.lock-screen{text-align:center;padding:40px 20px}
+.lock-screen svg{width:120px;height:120px;margin-bottom:20px}
+input,button{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:none;font-size:14px}
+input{background:#1e293b;color:#fff;border:1px solid #334155}
+button{background:#2563eb;color:#fff;font-weight:700;cursor:pointer}
+button:disabled{background:#334155;cursor:not-allowed}
+.fb-btn{background:#1877f2}
+.wa-btn{background:#25D366}
+.danger-btn{background:#ef4444}
+.success-btn{background:#22c55e}
+.topbar{display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin-bottom:8px}
+.header{background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:18px;padding:12px;margin-bottom:10px;text-align:center}
+.mode-badge{display:inline-block;padding:6px 12px;background:#1e293b;border:2px solid #38bdf8;border-radius:20px;font-size:11px;font-weight:700;margin-top:6px}
+.card{background:#1e293b;border-radius:16px;padding:14px;margin-bottom:12px;border:1px solid #334155}
+.mascot{display:flex;justify-content:center;margin-bottom:10px}
+.mascot svg{width:80px;height:80px}
+.guide{background:#0f172a;border-left:4px solid #facc15;padding:10px;border-radius:8px;font-size:12px;margin-bottom:10px}
+.bubble{background:#334155;padding:10px;border-radius:12px;font-size:13px;margin-bottom:10px}
+.code{font-family:'Courier New';font-size:12px;background:#0f172a;padding:12px;border-radius:8px;line-height:1.8}
+.slot{display:inline-block;min-width:50px;height:26px;background:#334155;border:2px dashed #facc15;border-radius:6px;text-align:center;line-height:22px;font-weight:700;vertical-align:middle}
+.slot.filled{border:2px solid #38bdf8;background:#1e293b}
+.blocks{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;justify-content:center;min-height:50px}
+.block{padding:8px 14px;background:#2563eb;border-radius:10px;font-weight:700;cursor:grab;touch-action:none;user-select:none;font-size:12px}
+.btn{width:100%;padding:12px;background:#22c55e;border:none;border-radius:10px;color:#fff;font-weight:700;font-size:14px;margin-top:8px}
+.progress-bar{height:6px;background:#334155;border-radius:10px;overflow:hidden;margin:8px 0}
+.progress{height:100%;background:linear-gradient(90deg,#3b82f6,#22c55e);transition:.3s}
+.energy{color:#facc15;font-weight:700}
+.note{font-size:11px;color:#94a3b8;text-align:center;margin-top:-4px;margin-bottom:8px}
+/* CHATBOT POPUP TOXIC */
+.chatbot{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;align-items:end;gap:10px}
+.chatbot-bubble{background:#ef4444;color:#fff;padding:12px 16px;border-radius:18px;max-width:220px;font-size:13px;font-weight:700;box-shadow:0 4px 12px #0005;animation:shake.5s}
+.chatbot svg{width:70px;height:70px;cursor:pointer;animation:bounce 1s infinite}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+/* MODAL PILIHAN */
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#000a;display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal-box{background:#1e293b;padding:20px;border-radius:20px;text-align:center;max-width:300px;border:2px solid #ef4444}
+.modal-box h3{color:#ef4444;margin-bottom:10px}
+.modal-box button{margin:6px 0}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="screen active" id="login">
+    <h2 style="text-align:center;margin:20px 0">50K Python 🔥</h2>
+    <input id="nama" placeholder="Masukin Nama Lu" required>
+    <input id="email" placeholder="Masukin Email Lu Sendiri" type="email" required>
+    <div class="note">Email ini buat save data. Aman, gak dikirim kemana²</div>
+    <input id="hp" placeholder="No WA Lu. Ex: 0812...">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">Masuk</button>
+    <button class="fb-btn" onclick="loginFB()">Masuk dengan Facebook [Simulasi]</button>
+  </div>
+
+  <div class="screen" id="lock">
+    <div class="lock-screen">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#f59e0b"/><text x="50" y="60" text-anchor="middle" font-size="40">🔒</text></svg>
+      <h2>Udah Cukup Buat Hari Ini!</h2>
+      <p id="lockText">Lanjut lagi besok di Level 101 ya 🔥</p>
+      <button onclick="keluar()">Keluar Dulu</button>
+    </div>
+  </div>
+
+  <div class="screen" id="game">
+    <div class="topbar">
+      <div>Halo <span id="user"></span></div>
+      <div>🔋<span class="energy" id="energy">200000</span>/200K | LVL <span id="lvl">1</span>/50K</div>
+    </div>
+    <div class="header">
+      <div class="mode-badge" id="mode">🟢 Tutorial 1/100</div>
+      <div class="progress-bar"><div class="progress" id="prog"></div></div>
+    </div>
+    <div class="card">
+      <div class="mascot" id="mascot"></div>
+      <div class="guide" id="guide"></div>
+      <div class="bubble" id="bubble"></div>
+      <div class="code" id="code"></div>
+      <div class="blocks" id="blocks"></div>
+      <button class="btn" id="btnCheck" onclick="check()">Check -1 Energy</button>
+      <button class="btn wa-btn" onclick="laporBug()">🐛 Lapor Bug ke Dev</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHATBOT DUO TOXIC -->
+<div class="chatbot" id="chatbot" style="display:none">
+  <div class="chatbot-bubble" id="chatText">Halo! Aku Duo Python 🦉</div>
+  <svg onclick="hideChat()" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#ef4444"/><text x="50" y="60" text-anchor="middle" font-size="40">🦉</text></svg>
+</div>
+
+<!-- MODAL PILIH LANJUT / TIDAK -->
+<div class="modal" id="modalPilih" style="display:none">
+  <div class="modal-box">
+    <h3>🦉 DUO BERTANYA</h3>
+    <p id="modalText">Udah Level 100. Mau lanjut atau nyerah?</p>
+    <button class="success-btn" onclick="pilihLanjut()">🔥 LANJUT -1000 Energy</button>
+    <button class="danger-btn" onclick="pilihStop()">🔒 Nyerah. Lanjut Besok</button>
+  </div>
+</div>
+
+<script>
+let state={energy:200000,lvl:1,nama:'',email:'',hp:'',lastDate:'',salah:0,forceContinue:false};
+const MAX_ENERGY=200000;
+const GATES=[100,300,500,700,1000,10000];
+const TOXIC=[`KAMU MAU MEMBUNUH SAYA?`,'BELAJAR DONG JANGAN MAGER','STREAK KAMU AKAN HANCUR','JANGAN LARI DARI TUGAS','INI SALAH! LAGI!','BACA PANDUAN! SEKARANG!'];
+
+const mascots={tutorial:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#10b981"/><circle cx="50" cy="35" r="20" fill="#fde68a"/><circle cx="42" cy="35" r="3" fill="#000"/><circle cx="58" cy="35" r="3" fill="#000"/></svg>`,easy:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#3b82f6"/><text x="50" y="55" text-anchor="middle" font-size="30">🧙</text></svg>`,hard:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#ef4444"/><text x="50" y="55" text-anchor="middle" font-size="30">💪</text></svg>`,medium:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#f59e0b"/><text x="50" y="55" text-anchor="middle" font-size="30">👩‍💻</text></svg>`,dewa:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#a855f7"/><text x="50" y="55" text-anchor="middle" font-size="30">⚡</text></svg>`,white:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#e5e7eb"/><text x="50" y="50" text-anchor="middle" font-size="20">🧑‍💻</text><text x="50" y="70" text-anchor="middle" font-size="8" fill="#000">WHITE</text></svg>`,black:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#111827"/><text x="50" y="50" text-anchor="middle" font-size="20">🧑‍💻</text><text x="50" y="70" text-anchor="middle" font-size="8" fill="#fff">BLACK</text></svg>`};
+const modes=[{max:100,key:'tutorial',name:'🟢 Tutorial',guide:'PANDUAN: Geser blok ke []. if=Jika else=Jika tidak > = Lebih dari < = Kurang dari'},{max:300,key:'easy',name:'🟢 Easy',guide:'PANDUAN: for=ngulang, in=di dalam, range=angka'},{max:500,key:'hard',name:'🔴 Hard',guide:'PANDUAN: and=dan, or=atau,!= tidak sama dengan'},{max:700,key:'medium',name:'🟡 Medium',guide:'PANDUAN: def=bikin fungsi, return=kembalikan nilai'},{max:900,key:'dewa',name:'⚫ Dewa',guide:'PANDUAN: class=OOP, self=diri sendiri'},{max:10000,key:'white',name:'⚪ White Hat',guide:'PANDUAN: Security, isdigit=cek angka'},{max:50000,key:'black',name:'⚫ Black Hat',guide:'PANDUAN: Simulasi pentest. for bersarang'}];
+const questions=[{mode:'tutorial',q:'LV1: Score > 50 print 🔥 else 😭',code:'score=60\n[] score [] 50:\n print("🔥")\n[]:\n print("😭")',ans:['if','>','else'],blocks:['if','else','>','<']},{mode:'easy',q:'LV101: Loop 0-4',code:'[] i [] range(5):\n print(i)',ans:['for','in'],blocks:['for','in','while']},{mode:'hard',q:'LV301: Score >50 AND <100',code:'s=75\nif s [] 50 [] s [] 100:\n print("OK")',ans:['>','and','<'],blocks:['>','<','and','or']},{mode:'medium',q:'LV501: Bikin fungsi sapa',code:'[] sapa(n):\n print("Hi",n)\n[]("Budi")',ans:['def','sapa'],blocks:['def','sapa','call']},{mode:'dewa',q:'LV701: Class Player',code:'[] Player:\n def __init__(self,n):\n self.n=n',ans:['class'],blocks:['class','def']},{mode:'white',q:'LV1001: Cek angka doang',code:'x=input()\nif not x.[]():\n print("Salah")',ans:['isdigit'],blocks:['isdigit','isalpha']},{mode:'black',q:'LV10001: Bruteforce 2 digit',code:'for a in range(10):\n for b in range(10):\n print([])',ans:['a,b'],blocks:['a,b','pass']}];
+
+// CHATBOT FUNCTIONS
+function showChat(msg){document.getElementById('chatText').innerText=msg;document.getElementById('chatbot').style.display='flex';}
+function hideChat(){document.getElementById('chatbot').style.display='none';}
+
+function login(){
+ state.nama=document.getElementById('nama').value||'Player';
+ state.email=document.getElementById('email').value||'';
+ state.hp=document.getElementById('hp').value||'0812';
+ if(!state.email.includes('@')){alert('Masukin email lu yang bener dulu we');return}
+ let save=JSON.parse(localStorage.getItem('python50k_'+state.email)||'{}');
+ state={...state,...save};
+ let today=new Date().toDateString();
+
+ if(Notification.permission==='default'){Notification.requestPermission();}
+
+ if(state.lastDate!=today && GATES.includes(state.lvl-1) &&!state.forceContinue){
+   document.getElementById('modalText').innerText=`Udah Level ${state.lvl-1} ${state.nama}. Mau lanjut atau nyerah?`;
+   document.getElementById('modalPilih').style.display='flex';
+   showChat(`HAH? Mau lanjut? Bayar 1000 Energy!`);
+   return;
+ }
+ document.getElementById('user').innerText=state.nama;
+ showScreen('game');updateEnergy();render();
+ showChat(`HAYO BELAJAR ${state.nama.toUpperCase()}! Level ${state.lvl} GAS!`);
+}
+function pilihLanjut(){
+ if(state.energy<1000){alert('Energy lu kurang 1000 buat nekat lanjut!');pilihStop();return}
+ state.energy-=1000;state.forceContinue=true;document.getElementById('modalPilih').style.display='none';
+ showChat(`YAKIN? OKE TAPI JANGAN NANGIS! -1000 ENERGY!`);
+ saveGame();login();
+}
+function pilihStop(){
+ state.forceContinue=false;document.getElementById('modalPilih').style.display='none';
+ document.getElementById('lockText').innerText=`PINTER! Istirahat dulu ${state.nama}. Besok Level ${state.lvl}!`;
+ showScreen('lock');
+ showChat(`NAH GITU DONG! Besok balik lagi ya!`);
+ setReminder();
+}
+function setReminder(){
+ if(Notification.permission!=='granted')return;
+ let tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);tomorrow.setHours(7,0,0);
+ let ms=tomorrow-now=new Date();
+ setTimeout(()=>{new Notification('DUO PYTHON MENGHAMPIRIMU 🦉',{body:`${state.nama.toUpperCase()}! BANGUN! Lanjut Level ${state.lvl} SEKARANG!`});},ms);
+}
+function keluar(){showScreen('login');}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function loginFB(){alert('SIMULASI FB LOGIN BERHASIL ✅');login();}
+function laporBug(){let no=state.hp.replace(/^0/,'62');let text=encodeURIComponent(`Halo Dev, ada bug di Level ${state.lvl} Mode ${getMode(state.lvl).name}. Nama: ${state.nama}`);window.open(`https://wa.me/${no}?text=${text}`,'_blank');}
+function getMode(lvl){return modes.find(m=>lvl<=m.max)||modes.at(-1)}
+function getQ(lvl){let m=getMode(lvl).key;let pool=questions.filter(q=>q.mode==m);return pool[(lvl-1)%pool.length]||questions[0];}
+function updateEnergy(){
+ document.getElementById('energy').innerText=state.energy.toLocaleString('id-ID');
+ document.getElementById('btnCheck').disabled = state.energy<=0;
+ if(state.energy<=0){document.getElementById('btnCheck').innerText='ENERGY HABIS 🔋'}
+ else{document.getElementById('btnCheck').innerText='Check -1 Energy'}
+}
+function render(){let m=getMode(state.lvl);let q=getQ(state.lvl);document.getElementById('lvl').innerText=state.lvl;document.getElementById('mode').innerText=m.name+' '+state.lvl+'/50K';document.getElementById('prog').style.width=(state.lvl/50000*100)+'%';document.getElementById('mascot').innerHTML=mascots[m.key];document.getElementById('guide').innerHTML='<b>'+m.guide+'</b>';document.getElementById('bubble').innerHTML=q.q;document.getElementById('code').innerHTML=q.code.replaceAll('[]','<span class="slot"></span>');document.getElementById('blocks').innerHTML=q.blocks.map(b=>`<div class="block" draggable="true">${b}</div>`).join('');initDrag();}
+function initDrag(){let dragged=null;document.querySelectorAll('.block').forEach(b=>{b.ondragstart=e=>dragged=e.target;b.ontouchstart=e=>dragged=e.target;});document.querySelectorAll('.slot').forEach(s=>{s.ondragover=e=>e.preventDefault();s.ondrop=e=>{e.preventDefault();if(dragged&&!s.innerText){s.innerText=dragged.innerText;s.classList.add('filled');dragged.remove()}};s.ontouchend=e=>{if(dragged&&!s.innerText){s.innerText=dragged.innerText;s.classList.add('filled');dragged.remove()}};});}
+function check(){
+ if(state.energy<=0){alert('🔋 ENERGY HABIS!');return}
+ let q=getQ(state.lvl);let slots=[...document.querySelectorAll('.slot')];
+ if(q.ans.length==0){nextLevel();return}
+ let ok=slots.every((s,i)=>s.innerText==q.ans[i]);
+ state.energy--;updateEnergy();
+ if(ok){state.salah=0;nextLevel()}else {
+  state.salah++;
+  alert('❌ SALAH! -1 Energy.');
+  showChat(TOXIC[state.salah%TOXIC.length]);
+ }
+ saveGame();
+}
+function nextLevel(){
+ state.lvl++;
+ if(GATES.includes(state.lvl-1) &&!state.forceContinue){
+   state.lastDate=new Date().toDateString();
+   document.getElementById('modalText').innerText=`Udah Level ${state.lvl-1} ${state.nama}. Mau lanjut atau nyerah?`;
+   document.getElementById('modalPilih').style.display='flex';
+   showChat(`BERHENTI! Mau nekat lanjut? Bayar 1000 Energy!`);
+   saveGame();
+   return;
+ }
+ state.forceContinue=false;
+ if(state.lvl>50000){alert('🏆 SELESAI 50K! KAMU LEGEND BLACK HAT!');showChat('AKHIRNYA! KAMU MENANG MELAWAN KEMALASAN! 🏆');return}
+ render();saveGame();showChat(`GAS! LEVEL ${state.lvl} SEKARANG!`);
+}
+function saveGame(){localStorage.setItem('python50k_'+state.email,JSON.stringify(state));}
+</script>
+</body>
+  </html>
